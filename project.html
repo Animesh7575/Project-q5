@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expense Tracker</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container mt-5">
+    <h1 class="mb-4">Expense Tracker</h1>
+    <form id="expenseForm" class="mb-3">
+      <div class="form-row">
+        <div class="col-md-4 mb-3">
+          <label for="expenseName">Expense Name</label>
+          <input type="text" class="form-control" id="expenseName" required>
+        </div>
+        <div class="col-md-4 mb-3">
+          <label for="expenseAmount">Expense Amount</label>
+          <input type="number" class="form-control" id="expenseAmount" required>
+        </div>
+        <div class="col-md-4 mb-3">
+          <button type="submit" class="btn btn-primary btn-block">Add Expense</button>
+        </div>
+      </div>
+    </form>
+    <ul id="expenseList" class="list-group"></ul>
+    <div id="totalExpense" class="mt-3"></div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const expenseForm = document.getElementById('expenseForm');
+      const expenseList = document.getElementById('expenseList');
+      const totalExpense = document.getElementById('totalExpense');
+
+      let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+
+      const displayExpenses = () => {
+        expenseList.innerHTML = '';
+        let total = 0;
+
+        expenses.forEach((expense, index) => {
+          const listItem = document.createElement('li');
+          listItem.classList.add('list-group-item');
+          listItem.innerHTML = `${expense.name} - $${expense.amount}
+            <button type="button" class="btn btn-sm btn-primary mx-2 editBtn">Edit</button>
+            <button type="button" class="btn btn-sm btn-danger deleteBtn">Delete</button>`;
+          expenseList.appendChild(listItem);
+          total += expense.amount;
+
+          const editBtn = listItem.querySelector('.editBtn');
+          editBtn.addEventListener('click', () => editExpense(index));
+
+          const deleteBtn = listItem.querySelector('.deleteBtn');
+          deleteBtn.addEventListener('click', () => deleteExpense(index));
+        });
+
+        totalExpense.textContent = `Total Expense: $${total}`;
+      };
+
+      const addExpense = (name, amount) => {
+        const expense = { name, amount };
+        expenses.push(expense);
+        localStorage.setItem('expenses', JSON.stringify(expenses));
+        displayExpenses();
+      };
+
+      const editExpense = (index) => {
+        const editedName = prompt('Enter new name:', expenses[index].name);
+        const editedAmount = parseFloat(prompt('Enter new amount:', expenses[index].amount));
+        if (editedName && editedAmount) {
+          expenses[index].name = editedName;
+          expenses[index].amount = editedAmount;
+          localStorage.setItem('expenses', JSON.stringify(expenses));
+          displayExpenses();
+        }
+      };
+
+      const deleteExpense = (index) => {
+        expenses.splice(index, 1);
+        localStorage.setItem('expenses', JSON.stringify(expenses));
+        displayExpenses();
+      };
+
+      expenseForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const expenseName = document.getElementById('expenseName').value;
+        const expenseAmount = parseFloat(document.getElementById('expenseAmount').value);
+        if (expenseName && expenseAmount) {
+          addExpense(expenseName, expenseAmount);
+          expenseForm.reset();
+        }
+      });
+
+      displayExpenses();
+    });
+  </script>
+</body>
+</html>
