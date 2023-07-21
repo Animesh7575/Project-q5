@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>User Details Form</title>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+  <h1>User Details Form</h1>
+  <form>
+    <label for="name">Name:</label>
+    <input type="text" id="name" required><br><br>
+
+    <label for="email">Email:</label>
+    <input type="email" id="email" required><br><br>
+
+    <label for="age">Age:</label>
+    <input type="number" id="age" required><br><br>
+
+    <button type="button" onclick="saveDetails()">Submit</button>
+  </form>
+
+  <script>
+    function saveDetails() {
+      var name = document.getElementById('name').value;
+      var email = document.getElementById('email').value;
+      var age = document.getElementById('age').value;
+
+      var userDetails = {
+        name: name,
+        email: email,
+        age: age
+      };
+
+      axios.post('https://crudcrud.com/api/5981d65c0d3b40c2a602ce733d5254dd/appointmentData', userDetails)
+        .then(function (response) {
+          console.log('User details saved successfully!', response.data);
+          alert('User details saved successfully!');
+        })
+        .catch(function (error) {
+          console.error('Error saving user details:', error);
+          alert('Error saving user details. Please try again.');
+        });
+    }
+  </script>
+</body>
+</html>
