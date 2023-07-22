@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Restaurant Order System</title>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+  <h1>Restaurant Order System</h1>
+
+  <h2>Enter Dish:</h2>
+  <input type="text" id="dish" placeholder="Enter Dish">
+
+  <h2>Enter Price:</h2>
+  <input type="number" id="price" placeholder="Enter Price">
+
+  <h2>Choose Table:</h2>
+  <select id="table">
+    <option value="1">Table 1</option>
+    <option value="2">Table 2</option>
+    <option value="3">Table 3</option>
+  </select>
+
+  <button onclick="addToBill()">Add to Bill</button>
+
+  <h2>ORDERS:</h2>
+  <div id="orders">
+    <ul id="table1Orders"></ul>
+    <ul id="table2Orders"></ul>
+    <ul id="table3Orders"></ul>
+  </div>
+
+  <h2>TABLE 1</h2>
+  <div id="table1OrdersList"></div>
+
+  <h2>TABLE 2</h2>
+  <div id="table2OrdersList"></div>
+
+  <h2>TABLE 3</h2>
+  <div id="table3OrdersList"></div>
+
+  <script>
+    const apiUrl = 'https://crudcrud.com/api/02b8eefa9e2146dc9d835428ac73e7bd/orders'; // Replace with your actual API endpoint from crudcrud.com
+
+    const orders = {
+      table1: [],
+      table2: [],
+      table3: [],
+    };
+
+    function addToBill() {
+      const dish = document.getElementById('dish').value;
+      const price = document.getElementById('price').value;
+      const table = document.getElementById('table').value;
+
+      if (dish && price && table) {
+        const order = { table, dish, price };
+        orders[`table${table}`].push(order);
+        saveOrderToAPI(order);
+        updateOrders();
+      }
+    }
+
+    function updateOrders() {
+      const table1OrdersList = document.getElementById('table1OrdersList');
+      const table2OrdersList = document.getElementById('table2OrdersList');
+      const table3OrdersList = document.getElementById('table3OrdersList');
+
+      table1OrdersList.innerHTML = '';
+      table2OrdersList.innerHTML = '';
+      table3OrdersList.innerHTML = '';
+
+      orders.table1.forEach((order, index) => {
+        const listItem = document.createElement('li');
+        listItem.textContent = `${order.price} - Table 1 - ${order.dish}`;
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.onclick = () => deleteOrder('table1', order._id); // Pass the order ID to the deleteOrder function
+        listItem.appendChild(deleteButton);
+        table1OrdersList.appendChild(listItem);
+      });
+
+      orders.table2.forEach((order, index) => {
+        const listItem = document.createElement('li');
+        listItem.textContent = `${order.price} - Table 2 - ${order.dish}`;
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.onclick = () => deleteOrder('table2', order._id); // Pass the order ID to the deleteOrder function
+        listItem.appendChild(deleteButton);
+        table2OrdersList.appendChild(listItem);
+      });
+
+      orders.table3.forEach((order, index) => {
+        const listItem = document.createElement('li');
+        listItem.textContent = `${order.price} - Table 3 - ${order.dish}`;
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.onclick = () => deleteOrder('table3', order._id); // Pass the order ID to the deleteOrder function
+        listItem.appendChild(deleteButton);
+        table3OrdersList.appendChild(listItem);
+      });
+    }
+
+    function deleteOrder(table, orderId) {
+      
+      axios.delete(`${apiUrl}/${orderId}`)
+        .then((response) => {
+          console.log('Order deleted successfully!', response.data);
+          alert('Order deleted successfully!');
+          orders[table] = orders[table].filter((order) => order._id !== orderId);
+          updateOrders();
+        })
+        .catch((error) => {
+          console.error('Error deleting order:', error);
+          alert('Error deleting order. Please try again.');
+        });
+    }
+
+    function saveOrderToAPI(order) {
+      axios.post(apiUrl, order)
+        .then((response) => {
+          console.log('Order saved successfully!', response.data);
+          alert('Order saved successfully!');
+        })
+        .catch((error) => {
+          console.error('Error saving order:', error);
+          alert('Error saving order. Please try again.');
+        });
+    }
+
+    axios.get(apiUrl)
+      .then((response) => {
+        console.log('Orders fetched successfully!', response.data);
+        response.data.forEach((order) => {
+          orders[`table${order.table}`].push(order);
+        });
+        updateOrders();
+      })
+      .catch((error) => {
+        console.error('Error fetching orders:', error);
+      });
+  </script>
+</body>
+</html>
